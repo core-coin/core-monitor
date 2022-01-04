@@ -2,15 +2,14 @@ package main
 
 import (
 	"context"
-	"fmt"
-	"github.com/ethereum/go-ethereum"
-	"github.com/ethereum/go-ethereum/common"
-	"github.com/ethereum/go-ethereum/common/hexutil"
-	"github.com/ethereum/go-ethereum/core/types"
-	"github.com/ethereum/go-ethereum/ethclient"
+	gocore2 "github.com/core-coin/go-core"
+	"github.com/core-coin/go-core/common"
+	"github.com/core-coin/go-core/core/types"
+	"github.com/core-coin/go-core/xcbclient"
+	"github.com/influxdata/influxdb-client-go"
+	"github.com/influxdata/influxdb-client-go/api"
 	"log"
 	"math/big"
-	"net/http"
 	"os"
 	"strconv"
 	"strings"
@@ -18,185 +17,177 @@ import (
 )
 
 var (
-	eth               *ethclient.Client
-	geth              *GethInfo
-	delay             int
-	watchingAddresses string
-	addresses         map[string]Address
+	delay      int
+	dbWriteAPI api.WriteAPI
 )
 
-func init() {
-	geth = new(GethInfo)
-	addresses = make(map[string]Address)
-	geth.TotalEth = big.NewInt(0)
-}
-
-type GethInfo struct {
-	GethServer       string
+type GocoreInfo struct {
+	GocoreServer     string
 	ContractsCreated int64
-	TokenTransfers   int64
 	ContractCalls    int64
-	EthTransfers     int64
+	XcbTransfers     int64
 	BlockSize        float64
 	LoadTime         float64
-	TotalEth         *big.Int
+	TotalXcb         *big.Int
 	CurrentBlock     *types.Block
-	Sync             *ethereum.SyncProgress
+	Sync             *gocore2.SyncProgress
 	LastBlockUpdate  time.Time
-	SugGasPrice      *big.Int
+	SugEnergyPrice   *big.Int
 	PendingTx        uint
 	NetworkId        *big.Int
 }
 
-type Address struct {
-	Balance *big.Int
-	Address string
-	Nonce   uint64
-}
-
 func main() {
-	var err error
-	defer eth.Close()
-	geth.GethServer = os.Getenv("GETH")
-	watchingAddresses = os.Getenv("ADDRESSES")
+	id, err := strconv.Atoi(os.Getenv("NETWORK_ID"))
+	if err != nil {
+		panic(err)
+	}
+	common.DefaultNetworkID = common.NetworkID(id)
+
+	token := os.Getenv("INFLUXDB_TOKEN")
+	bucket := os.Getenv("INFLUXDB_BUCKET")
+	org := os.Getenv("INFLUXDB_ORG")
+	url := os.Getenv("INFLUXDB_URL")
+
+	client := influxdb2.NewClient(url, token)
+	defer client.Close()
+	dbWriteAPI = client.WriteAPI(org, bucket)
+
+	hosts := os.Getenv("GOCORE_HOSTS")
 	delay, _ = strconv.Atoi(os.Getenv("DELAY"))
 	if delay == 0 {
-		delay = 500
-	}
-	log.Printf("Connecting to Ethereum node: %v\n", geth.GethServer)
-	eth, err = ethclient.Dial(geth.GethServer)
-	if err != nil {
-		panic(err)
-	}
-	geth.CurrentBlock, err = eth.BlockByNumber(context.TODO(), nil)
-	if err != nil {
-		panic(err)
+		delay = 1000
 	}
 
-	go Routine()
+	for _, host := range strings.Split(hosts, ",") {
+		gocore := new(GocoreInfo)
+		gocore.TotalXcb = big.NewInt(0)
+		gocore.GocoreServer = host
 
-	log.Printf("Geth Exporter running on http://localhost:9090/metrics\n")
+		log.Printf("Connecting to Go-dial node: %v\n", gocore.GocoreServer)
 
-	http.HandleFunc("/metrics", MetricsHttp)
-	err = http.ListenAndServe(":9090", nil)
-	if err != nil {
-		panic(err)
-	}
-}
+		dial, err := xcbclient.Dial(gocore.GocoreServer)
+		if err != nil {
+			log.Println("FATAL ERR: cannot connect to", host)
+			continue
+		}
+		defer dial.Close()
 
-func CalculateTotals(block *types.Block) {
-	geth.TotalEth = big.NewInt(0)
-	geth.ContractsCreated = 0
-	geth.TokenTransfers = 0
-	geth.EthTransfers = 0
-	for _, b := range block.Transactions() {
-
-		if b.To() == nil {
-			geth.ContractsCreated++
+		gocore.CurrentBlock, err = dial.BlockByNumber(context.TODO(), nil)
+		if err != nil {
+			log.Println("FATAL ERR: cannot get latest block from", host)
+			continue
 		}
 
-		if len(b.Data()) >= 4 {
-			method := hexutil.Encode(b.Data()[:4])
-			if method == "0xa9059cbb" {
-				geth.TokenTransfers++
-			}
+		go Routine(gocore, dial)
+	}
+
+	log.Printf("Gocore Exporter running with hosts: %s\n", hosts)
+	var wait chan bool
+	<-wait
+}
+
+func CalculateTotals(gocore *GocoreInfo) {
+	gocore.TotalXcb = big.NewInt(0)
+	gocore.ContractsCreated = 0
+	gocore.XcbTransfers = 0
+	for _, b := range gocore.CurrentBlock.Transactions() {
+
+		if b.To() == nil {
+			gocore.ContractsCreated++
 		}
 
 		if b.Value().Sign() == 1 {
-			geth.EthTransfers++
+			gocore.XcbTransfers++
 		}
-
-		geth.TotalEth.Add(geth.TotalEth, b.Value())
+		gocore.TotalXcb.Add(gocore.TotalXcb, b.Value())
 	}
-
-	size := strings.Split(geth.CurrentBlock.Size().String(), " ")
-	geth.BlockSize = stringToFloat(size[0]) * 1000
+	size := strings.Split(gocore.CurrentBlock.Size().String(), " ")
+	gocore.BlockSize = stringToFloat(size[0]) * 1000
 }
 
-func Routine() {
+func Routine(gocore *GocoreInfo, dial *xcbclient.Client) {
 	var lastBlock *types.Block
 	ctx := context.Background()
 	for {
 		t1 := time.Now()
 		var err error
-		geth.CurrentBlock, err = eth.BlockByNumber(ctx, nil)
+		gocore.CurrentBlock, err = dial.BlockByNumber(ctx, nil)
 		if err != nil {
-			log.Printf("issue with reponse from geth server: %v\n", geth.CurrentBlock)
+			log.Printf("issue with reponse from gocore server: %v\n", gocore.CurrentBlock)
 			time.Sleep(time.Duration(delay) * time.Millisecond)
 			continue
 		}
-		geth.SugGasPrice, _ = eth.SuggestGasPrice(ctx)
-		geth.PendingTx, _ = eth.PendingTransactionCount(ctx)
-		geth.NetworkId, _ = eth.NetworkID(ctx)
-		geth.Sync, _ = eth.SyncProgress(ctx)
-
-		if lastBlock == nil || geth.CurrentBlock.NumberU64() > lastBlock.NumberU64() {
-			log.Printf("Received block #%v with %v transactions (%v)\n", geth.CurrentBlock.NumberU64(), len(geth.CurrentBlock.Transactions()), geth.CurrentBlock.Hash().String())
-			geth.LastBlockUpdate = time.Now()
-			geth.LoadTime = time.Now().Sub(t1).Seconds()
+		gocore.SugEnergyPrice, err = dial.SuggestEnergyPrice(ctx)
+		if err != nil {
+			panic(err)
+		}
+		gocore.PendingTx, err = dial.PendingTransactionCount(ctx)
+		if err != nil {
+			panic(err)
+		}
+		gocore.NetworkId, err = dial.NetworkID(ctx)
+		if err != nil {
+			panic(err)
+		}
+		gocore.Sync, err = dial.SyncProgress(ctx)
+		if err != nil {
+			panic(err)
 		}
 
-		if watchingAddresses != "" {
-			for _, a := range strings.Split(watchingAddresses, ",") {
-				addr := common.HexToAddress(a)
-				balance, _ := eth.BalanceAt(ctx, addr, geth.CurrentBlock.Number())
-				nonce, _ := eth.NonceAt(ctx, addr, geth.CurrentBlock.Number())
-				address := Address{
-					Address: addr.String(),
-					Balance: balance,
-					Nonce:   nonce,
-				}
-				addresses[a] = address
-			}
+		if lastBlock == nil || gocore.CurrentBlock.NumberU64() > lastBlock.NumberU64() {
+			log.Printf("Received block #%v with %v transactions (%v)\n", gocore.CurrentBlock.NumberU64(), len(gocore.CurrentBlock.Transactions()), gocore.CurrentBlock.Hash().String())
+			gocore.LastBlockUpdate = time.Now()
+			gocore.LoadTime = time.Now().Sub(t1).Seconds()
 		}
 
-		lastBlock = geth.CurrentBlock
+		CalculateTotals(gocore)
+
+		writeToDB(gocore)
+
+		lastBlock = gocore.CurrentBlock
 		time.Sleep(time.Duration(delay) * time.Millisecond)
 	}
 }
 
-//
-// HTTP response handler for /metrics
-func MetricsHttp(w http.ResponseWriter, r *http.Request) {
-	var allOut []string
-	block := geth.CurrentBlock
-	if block == nil {
-		w.WriteHeader(http.StatusInternalServerError)
-		w.Write([]byte(fmt.Sprintf("issue receiving block from URL: %v", geth.GethServer)))
-		return
-	}
-	CalculateTotals(block)
+func writeToDB(gocore *GocoreInfo) {
+	block := gocore.CurrentBlock
 
-	allOut = append(allOut, fmt.Sprintf("geth_block %v", block.NumberU64()))
-	allOut = append(allOut, fmt.Sprintf("geth_seconds_last_block %0.2f", time.Now().Sub(geth.LastBlockUpdate).Seconds()))
-	allOut = append(allOut, fmt.Sprintf("geth_block_transactions %v", len(block.Transactions())))
-	allOut = append(allOut, fmt.Sprintf("geth_block_value %v", ToEther(geth.TotalEth)))
-	allOut = append(allOut, fmt.Sprintf("geth_block_gas_used %v", block.GasUsed()))
-	allOut = append(allOut, fmt.Sprintf("geth_block_gas_limit %v", block.GasLimit()))
-	allOut = append(allOut, fmt.Sprintf("geth_block_nonce %v", block.Nonce()))
-	allOut = append(allOut, fmt.Sprintf("geth_block_difficulty %v", block.Difficulty()))
-	allOut = append(allOut, fmt.Sprintf("geth_block_uncles %v", len(block.Uncles())))
-	allOut = append(allOut, fmt.Sprintf("geth_block_size_bytes %v", geth.BlockSize))
-	allOut = append(allOut, fmt.Sprintf("geth_gas_price %v", geth.SugGasPrice))
-	allOut = append(allOut, fmt.Sprintf("geth_pending_transactions %v", geth.PendingTx))
-	allOut = append(allOut, fmt.Sprintf("geth_network_id %v", geth.NetworkId))
-	allOut = append(allOut, fmt.Sprintf("geth_contracts_created %v", geth.ContractsCreated))
-	allOut = append(allOut, fmt.Sprintf("geth_token_transfers %v", geth.TokenTransfers))
-	allOut = append(allOut, fmt.Sprintf("geth_eth_transfers %v", geth.EthTransfers))
-	allOut = append(allOut, fmt.Sprintf("geth_load_time %0.4f", geth.LoadTime))
+	var tags = map[string]interface{}{}
+	tags["gocore_block"] = block.NumberU64()
 
-	if geth.Sync != nil {
-		allOut = append(allOut, fmt.Sprintf("geth_known_states %v", int(geth.Sync.KnownStates)))
-		allOut = append(allOut, fmt.Sprintf("geth_highest_block %v", int(geth.Sync.HighestBlock)))
-		allOut = append(allOut, fmt.Sprintf("geth_pulled_states %v", int(geth.Sync.PulledStates)))
+	tags["gocore_seconds_last_block"] = time.Now().Sub(gocore.LastBlockUpdate).Seconds()
+	tags["gocore_block_transactions"] = len(block.Transactions())
+
+	n, _ := strconv.ParseFloat(ToXcb(gocore.TotalXcb).Text('f', 2), 64)
+	tags["gocore_block_value"] = n
+
+	tags["gocore_block_energy_used"] = block.EnergyUsed()
+	tags["gocore_block_energy_limit"] = block.EnergyLimit()
+	tags["gocore_block_nonce"] = block.Nonce()
+	tags["gocore_block_difficulty"] = block.Difficulty().Int64()
+	tags["gocore_block_uncles"] = len(block.Uncles())
+	tags["gocore_block_size_bytes"] = gocore.BlockSize
+	tags["gocore_energy_price"] = gocore.SugEnergyPrice.Int64()
+	tags["gocore_pending_transactions"] = gocore.PendingTx
+	tags["gocore_network_id"] = gocore.NetworkId.Int64()
+	tags["gocore_contracts_created"] = gocore.ContractsCreated
+	tags["gocore_core_transfers"] = gocore.XcbTransfers
+	tags["gocore_load_time"] = gocore.LoadTime
+
+	if gocore.Sync != nil {
+		tags["gocore_known_states"] = int(gocore.Sync.KnownStates)
+		tags["gocore_highest_block"] = int(gocore.Sync.HighestBlock)
+		tags["gocore_pulled_states"] = int(gocore.Sync.PulledStates)
 	}
 
-	for _, v := range addresses {
-		allOut = append(allOut, fmt.Sprintf("geth_address_balance{address=\"%v\"} %v", v.Address, ToEther(v.Balance).String()))
-		allOut = append(allOut, fmt.Sprintf("geth_address_nonce{address=\"%v\"} %v", v.Address, v.Nonce))
-	}
-
-	w.Write([]byte(strings.Join(allOut, "\n")))
+	dbWriteAPI.WritePoint(influxdb2.NewPoint(
+		"gocore_node",
+		map[string]string{"host": gocore.GocoreServer},
+		tags,
+		time.Now(),
+	))
+	dbWriteAPI.Flush()
 }
 
 // stringToFloat will simply convert a string to a float
@@ -206,10 +197,10 @@ func stringToFloat(s string) float64 {
 }
 
 //
-// CONVERTS WEI TO ETH
-func ToEther(o *big.Int) *big.Float {
-	pul, int := big.NewFloat(0), big.NewFloat(0)
-	int.SetInt(o)
-	pul.Mul(big.NewFloat(0.000000000000000001), int)
+// CONVERTS ORE TO XCB
+func ToXcb(o *big.Int) *big.Float {
+	pul, val := big.NewFloat(0), big.NewFloat(0)
+	val.SetInt(o)
+	pul.Mul(big.NewFloat(0.000000000000000001), val)
 	return pul
 }

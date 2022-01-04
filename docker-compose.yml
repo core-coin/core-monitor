@@ -1,0 +1,53 @@
+version: "3.3"
+
+services:
+  xcbexporter:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    restart: "always"
+    container_name: xcbexporter
+    network_mode: host
+    environment:
+      - NETWORK_ID=${NETWORK_ID}
+      - GOCORE_HOSTS=${GOCORE_HOSTS}
+      - INFLUXDB_ORG=${INFLUXDB_ORG}
+      - INFLUXDB_BUCKET=${INFLUXDB_BUCKET}
+      - INFLUXDB_TOKEN=${INFLUXDB_TOKEN}
+      - INFLUXDB_URL=${INFLUXDB_URL}
+    depends_on:
+      - influxdb
+
+  influxdb:
+    image: influxdb:2.0
+    restart: "always"
+    container_name: influxdb
+    network_mode: host
+    environment:
+      - DOCKER_INFLUXDB_INIT_MODE=${DOCKER_INFLUXDB_INIT_MODE}
+      - DOCKER_INFLUXDB_HTTP_AUTH_ENABLED=${DOCKER_INFLUXDB_HTTP_AUTH_ENABLED}
+      - DOCKER_INFLUXDB_INIT_USERNAME=${DOCKER_INFLUXDB_INIT_USERNAME}
+      - DOCKER_INFLUXDB_INIT_PASSWORD=${DOCKER_INFLUXDB_INIT_PASSWORD}
+      - DOCKER_INFLUXDB_INIT_ORG=${INFLUXDB_ORG}
+      - DOCKER_INFLUXDB_INIT_BUCKET=${INFLUXDB_BUCKET}
+      - DOCKER_INFLUXDB_INIT_ADMIN_TOKEN=${INFLUXDB_TOKEN}
+
+  grafana:
+    image: grafana/grafana-enterprise
+    container_name: grafana
+    restart: "always"
+    network_mode: host
+    environment:
+      - INFLUXDB_ORG=${INFLUXDB_ORG}
+      - INFLUXDB_BUCKET=${INFLUXDB_BUCKET}
+      - INFLUXDB_TOKEN=${INFLUXDB_TOKEN}
+      - INFLUXDB_URL=${INFLUXDB_URL}
+      - GF_SECURITY_ADMIN_PASSWORD=${GRAFANA_PASSWORD}
+      - GF_SECURITY_ADMIN_USER=${GRAFANA_USER}
+    volumes:
+      - ./grafana/grafana.ini:/etc/grafana/grafana.ini
+      - ./grafana/dashboards.yaml:/etc/grafana/provisioning/dashboards/default.yaml
+      - ./grafana/influxdb.yaml:/etc/grafana/provisioning/datasources/influxdb.yaml
+      - ./grafana/dashboard.json:/var/lib/grafana/dashboards/dashboard.json
+    depends_on:
+      - influxdb
