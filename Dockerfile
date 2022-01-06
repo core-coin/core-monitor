@@ -1,6 +1,6 @@
 FROM golang:1.16-alpine as base
 RUN apk add --no-cache libstdc++ gcc g++ make git ca-certificates linux-headers
-RUN git config --global url."https://error2215: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@github.com".insteadOf "https://github.com"
+RUN git config --global url."https://{login}:{token}@github.com".insteadOf "https://github.com"
 WORKDIR /go/src/github.com/core-coin/xcbexporter
 ADD . .
 RUN go get && go install
