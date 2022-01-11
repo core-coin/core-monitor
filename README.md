@@ -12,7 +12,7 @@ docker run -it -d -p 9090:9090 \
 ```
 
 ## Features
-- Current and Average Gas Price
+- Current and Average Energy Price
 - Total amount of ERC20 Token Transfers
 - Total amount of XCB transactions
 - Watch balance on specific addresses
@@ -31,13 +31,13 @@ gocore_block 7042028
 gocore_seconds_last_block 0.50
 gocore_block_transactions 48
 gocore_block_value 59.48321713266354
-gocore_block_gas_used 1243863
-gocore_block_gas_limit 8000000
+gocore_block_energy_used 1243863
+gocore_block_energy_limit 8000000
 gocore_block_nonce 7516583072599285197
 gocore_block_difficulty 2606288773636567
 gocore_block_uncles 0
 gocore_block_size_bytes 6680
-gocore_gas_price 2000000000
+gocore_energy_price 2000000000
 gocore_pending_transactions 136
 gocore_network_id 1
 gocore_contracts_created 0
