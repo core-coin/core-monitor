@@ -1,4 +1,38 @@
 {
+  "__inputs": [],
+  "__elements": [],
+  "__requires": [
+    {
+      "type": "panel",
+      "id": "gauge",
+      "name": "Gauge",
+      "version": ""
+    },
+    {
+      "type": "grafana",
+      "id": "grafana",
+      "name": "Grafana",
+      "version": "8.4.3-54429"
+    },
+    {
+      "type": "panel",
+      "id": "graph",
+      "name": "Graph (old)",
+      "version": ""
+    },
+    {
+      "type": "panel",
+      "id": "stat",
+      "name": "Stat",
+      "version": ""
+    },
+    {
+      "type": "panel",
+      "id": "text",
+      "name": "Text",
+      "version": ""
+    }
+  ],
   "annotations": {
     "list": [
       {
@@ -20,34 +54,41 @@
   },
   "editable": true,
   "fiscalYearStartMonth": 0,
-  "gnetId": null,
   "graphTooltip": 1,
-  "id": 1,
-  "iteration": 1640364565504,
+  "id": null,
+  "iteration": 1647799812915,
   "links": [
     {
       "icon": "info",
       "tags": [],
       "targetBlank": true,
-      "title": "Github Repo",
-      "tooltip": "Visit Repo",
+      "title": "Repo",
+      "tooltip": "Visit Repository",
       "type": "link",
-      "url": "https://github.com/core-coin/gocoreexporter"
+      "url": "https://github.com/core-coin/core-monitor"
     },
     {
       "icon": "info",
       "tags": [],
       "targetBlank": true,
-      "title": "Grafana Dashboard",
-      "tooltip": "Visit Grafana",
+      "title": "Dashboard",
+      "tooltip": "Visit Dashboard",
       "type": "link",
-      "url": "https://grafana.com/dashboards/6976/edit"
+      "url": "https://grafana.com/dashboards/15957/edit"
+    },
+    {
+      "icon": "info",
+      "tags": [],
+      "targetBlank": true,
+      "title": "Blockchain web",
+      "tooltip": "Visit Core Blockchain web",
+      "type": "link",
+      "url": "https://coreblockchain.cc"
     }
   ],
   "liveNow": false,
   "panels": [
     {
-      "datasource": null,
       "fieldConfig": {
         "defaults": {
           "color": {
@@ -105,7 +146,7 @@
         "text": {},
         "textMode": "auto"
       },
-      "pluginVersion": "8.2.0",
+      "pluginVersion": "8.4.3-54429",
       "targets": [
         {
           "expr": "gocore_block",
@@ -127,7 +168,6 @@
       "bars": false,
       "dashLength": 10,
       "dashes": false,
-      "datasource": null,
       "fill": 10,
       "fillGradient": 0,
       "gridPos": {
@@ -155,7 +195,7 @@
         "alertThreshold": true
       },
       "percentage": false,
-      "pluginVersion": "8.2.0",
+      "pluginVersion": "8.4.3-54429",
       "pointradius": 5,
       "points": false,
       "renderer": "flot",
@@ -175,9 +215,7 @@
         }
       ],
       "thresholds": [],
-      "timeFrom": null,
       "timeRegions": [],
-      "timeShift": null,
       "title": "Transactions",
       "tooltip": {
         "shared": true,
@@ -186,9 +224,7 @@
       },
       "type": "graph",
       "xaxis": {
-        "buckets": null,
         "mode": "time",
-        "name": null,
         "show": true,
         "values": []
       },
@@ -213,7 +249,6 @@
       }
     },
     {
-      "datasource": null,
       "fieldConfig": {
         "defaults": {
           "color": {
@@ -271,7 +306,7 @@
         "text": {},
         "textMode": "auto"
       },
-      "pluginVersion": "8.2.0",
+      "pluginVersion": "8.4.3-54429",
       "targets": [
         {
           "expr": "gocore_core_transfers",
@@ -287,7 +322,6 @@
       "type": "stat"
     },
     {
-      "datasource": null,
       "fieldConfig": {
         "defaults": {
           "color": {
@@ -345,7 +379,7 @@
         "text": {},
         "textMode": "auto"
       },
-      "pluginVersion": "8.2.0",
+      "pluginVersion": "8.4.3-54429",
       "targets": [
         {
           "expr": "gocore_pending_transactions",
@@ -361,7 +395,6 @@
       "type": "stat"
     },
     {
-      "datasource": null,
       "fieldConfig": {
         "defaults": {
           "color": {
@@ -420,7 +453,7 @@
         "text": {},
         "textMode": "auto"
       },
-      "pluginVersion": "8.2.0",
+      "pluginVersion": "8.4.3-54429",
       "targets": [
         {
           "expr": "gocore_block_value",
@@ -443,7 +476,6 @@
       "bars": false,
       "dashLength": 10,
       "dashes": false,
-      "datasource": null,
       "fill": 10,
       "fillGradient": 0,
       "gridPos": {
@@ -471,7 +503,7 @@
         "alertThreshold": true
       },
       "percentage": false,
-      "pluginVersion": "8.2.0",
+      "pluginVersion": "8.4.3-54429",
       "pointradius": 5,
       "points": false,
       "renderer": "flot",
@@ -492,9 +524,7 @@
         }
       ],
       "thresholds": [],
-      "timeFrom": null,
       "timeRegions": [],
-      "timeShift": null,
       "title": "Energy Price (nucle)",
       "tooltip": {
         "shared": true,
@@ -504,9 +534,7 @@
       "transformations": [],
       "type": "graph",
       "xaxis": {
-        "buckets": null,
         "mode": "time",
-        "name": null,
         "show": false,
         "values": []
       },
@@ -532,7 +560,6 @@
       }
     },
     {
-      "datasource": null,
       "fieldConfig": {
         "defaults": {
           "color": {
@@ -594,7 +621,7 @@
         "showThresholdMarkers": true,
         "text": {}
       },
-      "pluginVersion": "8.2.0",
+      "pluginVersion": "8.4.3-54429",
       "targets": [
         {
           "expr": "gocore_energy_price / 1000000000",
@@ -610,7 +637,6 @@
       "type": "gauge"
     },
     {
-      "datasource": null,
       "fieldConfig": {
         "defaults": {
           "color": {
@@ -672,7 +698,7 @@
         "showThresholdMarkers": true,
         "text": {}
       },
-      "pluginVersion": "8.2.0",
+      "pluginVersion": "8.4.3-54429",
       "targets": [
         {
           "expr": "gocore_seconds_last_block",
@@ -694,7 +720,6 @@
       "bars": false,
       "dashLength": 10,
       "dashes": false,
-      "datasource": null,
       "fill": 10,
       "fillGradient": 0,
       "gridPos": {
@@ -724,7 +749,7 @@
         "alertThreshold": true
       },
       "percentage": false,
-      "pluginVersion": "8.2.0",
+      "pluginVersion": "8.4.3-54429",
       "pointradius": 5,
       "points": false,
       "renderer": "flot",
@@ -743,9 +768,7 @@
         }
       ],
       "thresholds": [],
-      "timeFrom": null,
       "timeRegions": [],
-      "timeShift": null,
       "title": "XCB Transfers",
       "tooltip": {
         "shared": true,
@@ -754,9 +777,7 @@
       },
       "type": "graph",
       "xaxis": {
-        "buckets": null,
         "mode": "time",
-        "name": null,
         "show": false,
         "values": []
       },
@@ -785,7 +806,6 @@
       "bars": true,
       "dashLength": 10,
       "dashes": false,
-      "datasource": null,
       "fill": 1,
       "fillGradient": 0,
       "gridPos": {
@@ -815,7 +835,7 @@
         "alertThreshold": true
       },
       "percentage": false,
-      "pluginVersion": "8.2.0",
+      "pluginVersion": "8.4.3-54429",
       "pointradius": 5,
       "points": false,
       "renderer": "flot",
@@ -834,9 +854,7 @@
         }
       ],
       "thresholds": [],
-      "timeFrom": null,
       "timeRegions": [],
-      "timeShift": null,
       "title": "Contracts Created",
       "tooltip": {
         "shared": true,
@@ -845,9 +863,7 @@
       },
       "type": "graph",
       "xaxis": {
-        "buckets": null,
         "mode": "time",
-        "name": null,
         "show": false,
         "values": []
       },
@@ -877,7 +893,6 @@
       "bars": false,
       "dashLength": 10,
       "dashes": false,
-      "datasource": null,
       "fill": 10,
       "fillGradient": 0,
       "gridPos": {
@@ -905,7 +920,7 @@
         "alertThreshold": true
       },
       "percentage": false,
-      "pluginVersion": "8.2.0",
+      "pluginVersion": "8.4.3-54429",
       "pointradius": 5,
       "points": false,
       "renderer": "flot",
@@ -924,9 +939,7 @@
         }
       ],
       "thresholds": [],
-      "timeFrom": null,
       "timeRegions": [],
-      "timeShift": null,
       "title": "Block Difficulty",
       "tooltip": {
         "shared": true,
@@ -935,9 +948,7 @@
       },
       "type": "graph",
       "xaxis": {
-        "buckets": null,
         "mode": "time",
-        "name": null,
         "show": false,
         "values": []
       },
@@ -964,7 +975,6 @@
       "bars": false,
       "dashLength": 10,
       "dashes": false,
-      "datasource": null,
       "fill": 10,
       "fillGradient": 0,
       "gridPos": {
@@ -992,7 +1002,7 @@
         "alertThreshold": true
       },
       "percentage": false,
-      "pluginVersion": "8.2.0",
+      "pluginVersion": "8.4.3-54429",
       "pointradius": 5,
       "points": false,
       "renderer": "flot",
@@ -1011,9 +1021,7 @@
         }
       ],
       "thresholds": [],
-      "timeFrom": null,
       "timeRegions": [],
-      "timeShift": null,
       "title": "Block Size",
       "tooltip": {
         "shared": true,
@@ -1022,9 +1030,7 @@
       },
       "type": "graph",
       "xaxis": {
-        "buckets": null,
         "mode": "time",
-        "name": null,
         "show": false,
         "values": []
       },
@@ -1051,7 +1057,6 @@
       "bars": true,
       "dashLength": 10,
       "dashes": false,
-      "datasource": null,
       "fill": 1,
       "fillGradient": 0,
       "gridPos": {
@@ -1079,7 +1084,7 @@
         "alertThreshold": true
       },
       "percentage": false,
-      "pluginVersion": "8.2.0",
+      "pluginVersion": "8.4.3-54429",
       "pointradius": 5,
       "points": false,
       "renderer": "flot",
@@ -1098,9 +1103,7 @@
         }
       ],
       "thresholds": [],
-      "timeFrom": null,
       "timeRegions": [],
-      "timeShift": null,
       "title": "Energy Used",
       "tooltip": {
         "shared": true,
@@ -1109,9 +1112,7 @@
       },
       "type": "graph",
       "xaxis": {
-        "buckets": null,
         "mode": "time",
-        "name": null,
         "show": false,
         "values": []
       },
@@ -1138,7 +1139,6 @@
       "bars": false,
       "dashLength": 10,
       "dashes": false,
-      "datasource": null,
       "fill": 10,
       "fillGradient": 0,
       "gridPos": {
@@ -1166,7 +1166,7 @@
         "alertThreshold": true
       },
       "percentage": false,
-      "pluginVersion": "8.2.0",
+      "pluginVersion": "8.4.3-54429",
       "pointradius": 5,
       "points": false,
       "renderer": "flot",
@@ -1185,9 +1185,7 @@
         }
       ],
       "thresholds": [],
-      "timeFrom": null,
       "timeRegions": [],
-      "timeShift": null,
       "title": "Block Nonce",
       "tooltip": {
         "shared": true,
@@ -1196,9 +1194,7 @@
       },
       "type": "graph",
       "xaxis": {
-        "buckets": null,
         "mode": "time",
-        "name": null,
         "show": false,
         "values": []
       },
@@ -1219,7 +1215,6 @@
       }
     },
     {
-      "datasource": null,
       "fieldConfig": {
         "defaults": {
           "color": {
@@ -1281,7 +1276,7 @@
         "showThresholdMarkers": true,
         "text": {}
       },
-      "pluginVersion": "8.2.0",
+      "pluginVersion": "8.4.3-54429",
       "targets": [
         {
           "expr": "gocore_load_time",
@@ -1304,7 +1299,6 @@
       "bars": true,
       "dashLength": 10,
       "dashes": false,
-      "datasource": null,
       "fill": 1,
       "fillGradient": 0,
       "gridPos": {
@@ -1332,7 +1326,7 @@
         "alertThreshold": true
       },
       "percentage": false,
-      "pluginVersion": "8.2.0",
+      "pluginVersion": "8.4.3-54429",
       "pointradius": 5,
       "points": false,
       "renderer": "flot",
@@ -1353,9 +1347,7 @@
         }
       ],
       "thresholds": [],
-      "timeFrom": null,
       "timeRegions": [],
-      "timeShift": null,
       "title": "Pending Transactions",
       "tooltip": {
         "shared": true,
@@ -1364,9 +1356,7 @@
       },
       "type": "graph",
       "xaxis": {
-        "buckets": null,
         "mode": "time",
-        "name": null,
         "show": false,
         "values": []
       },
@@ -1387,7 +1377,6 @@
       }
     },
     {
-      "datasource": null,
       "gridPos": {
         "h": 3,
         "w": 24,
@@ -1400,7 +1389,7 @@
         "content": "<p align=\"center\" style=\"font-size:30pt\">Today Totals</p>",
         "mode": "html"
       },
-      "pluginVersion": "8.2.0",
+      "pluginVersion": "8.4.3-54429",
       "type": "text"
     },
     {
@@ -1408,7 +1397,6 @@
       "bars": false,
       "dashLength": 10,
       "dashes": false,
-      "datasource": null,
       "fill": 1,
       "fillGradient": 0,
       "gridPos": {
@@ -1436,7 +1424,7 @@
         "alertThreshold": true
       },
       "percentage": false,
-      "pluginVersion": "8.2.0",
+      "pluginVersion": "8.4.3-54429",
       "pointradius": 5,
       "points": false,
       "renderer": "flot",
@@ -1457,7 +1445,6 @@
       "thresholds": [],
       "timeFrom": "24h",
       "timeRegions": [],
-      "timeShift": null,
       "title": "Transactions",
       "tooltip": {
         "shared": true,
@@ -1466,9 +1453,7 @@
       },
       "type": "graph",
       "xaxis": {
-        "buckets": null,
         "mode": "time",
-        "name": null,
         "show": true,
         "values": []
       },
@@ -1491,23 +1476,14 @@
     }
   ],
   "refresh": "",
-  "schemaVersion": 31,
+  "schemaVersion": 35,
   "style": "dark",
   "tags": [],
   "templating": {
     "list": [
       {
-        "allValue": null,
-        "current": {
-          "isNone": true,
-          "selected": false,
-          "text": "None",
-          "value": ""
-        },
-        "datasource": null,
+        "current": {},
         "definition": "from(bucket: \"my-bucket\")\n// Give range of start and stop as per your usecase\n|> range (start: v.timeRangeStart, stop: v.timeRangeStop)\n|> filter(fn:(r) => r._measurement == \"gocore_node\")\n|> pivot(rowKey:[\"_time\"], columnKey: [\"_field\"], valueColumn: \"_value\")\n|> group()\n|> distinct(column: \"host\")",
-        "description": null,
-        "error": null,
         "hide": 0,
         "includeAll": false,
         "label": "gocore_address",
@@ -1554,7 +1530,8 @@
     ]
   },
   "timezone": "",
-  "title": "Gocore Server",
-  "uid": "cslWklh7z",
-  "version": 8
+  "title": "Core Monitor",
+  "uid": "core-monitor-01",
+  "version": 1,
+  "weekStart": ""
 }

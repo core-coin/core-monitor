@@ -1,31 +1,41 @@
-# Gocore Server Prometheus Exporter [![](https://images.microbadger.com/badges/image/core-coin/xcbexporter.svg)](https://microbadger.com/images/core-coin/xcbexporter)
-Monitor your Core-coin Gocore server with Prometheus and Grafana. Checkout the [Grafana Dashboard](https://grafana.com/dashboards/6976) to implement a beautiful gocore server monitor for your own server, or you can just import Dashboard ID: `6976` once you have xcbexporter up and running.
+# Core Monitor
 
-<p align="center"><img width="90%" src="https://img.cjx.io/xcbexporter-grafana.png"></p>
+## Go-core Server Prometheus Exporter
+
+[![](docs/preview.png)](docs/preview.png)
+
+Monitor your Core Blockchain Go-core server with Prometheus and Grafana.
+
+Visit the [Grafana Dashboard](https://grafana.com/dashboards/15957) to implement a go-core server monitor for your own server, or you can just import Dashboard ID: `15957` once you have Core Monitor up and running.
 
 ## Docker
-Run this Prometheus Exporter in a [Docker container](https://hub.docker.com/r/core-coin/xcbexporter/builds/)! Include your Gocore server endpoint as `GOCORE` environment variable.
+
+Run this Prometheus Exporter in a [Docker container](Dockerfile). Include your Go-core server endpoint as `GOCORE` environment variable.
+
 ```bash
 docker run -it -d -p 9090:9090 \
   -e "GOCORE="http://mygocoreserverhere.com:8545" \
-  core-coin/xcbexporter
+  core-coin/core-monitor
 ```
 
 ## Features
+
 - Current and Average Energy Price
-- Total amount of ERC20 Token Transfers
+- Total amount of CRC20 Token Transfers
 - Total amount of XCB transactions
 - Watch balance on specific addresses
 - Pending Transaction count
 
 ## Environment Variables
-You can add the environment variable `ADDRESSES` with a comma delimited list of core-coin addresses.
 
-- `GOCORE` = `http://xcb.mygocoreserver.com:8545` Core-coin node endpoint
-- `ADDRESSES` = `0x867fFB5a3871b500f65BdFafe0136f9667Deae06,0xF008E2c7A7F16ac706C2E0EBD3F015D442016420`
+You can add the environment variable `ADDRESSES` with a comma delimited list of Core Blockchain addresses.
+
+- `GOCORE` = `http://xcb.mygocoreserver.com:8545` Core Blockchain node endpoint
+- `ADDRESSES` = `cb406993957991426174f5a85456985b1c1c36591e89,cb90c2932989a1fb0accf660d960af031dffb68e447b`
 - `DELAY` = `500` millisecond delay between requests
 
-## Prometheus Response
+## Prometheus Response (example)
+
 ```
 gocore_block 7042028
 gocore_seconds_last_block 0.50
@@ -44,8 +54,12 @@ gocore_contracts_created 0
 gocore_token_transfers 10
 gocore_xcb_transfers 35
 gocore_load_time 0.5302
-gocore_address_balance{address="0x867fFB5a3871b500f65BdFafe0136f9667Deae06"} 86.99212193
-gocore_address_nonce{address="0x867fFB5a3871b500f65BdFafe0136f9667Deae06"} 1
-gocore_address_balance{address="0xF008E2c7A7F16ac706C2E0EBD3F015D442016420"} 0.1605609476
-gocore_address_nonce{address="0xF008E2c7A7F16ac706C2E0EBD3F015D442016420"} 95623
+gocore_address_balance{address="cb406993957991426174f5a85456985b1c1c36591e89"} 86.99212193
+gocore_address_nonce{address="cb90c2932989a1fb0accf660d960af031dffb68e447b"} 1
+gocore_address_balance{address="cb600bfa7a2f85a2a207b5a22eec03822f8031afeed4"} 0.1605609476
+gocore_address_nonce{address="cb047103a1cb2152742fab6d168abea324c64293894b"} 95623
 ```
+
+## License
+
+[CORE License](https://github.com/cryptohub-digital/core-license/blob/master/LICENSE)

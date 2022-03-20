@@ -1,12 +1,12 @@
 version: "3.3"
 
 services:
-  xcbexporter:
+  core-monitor:
     build:
       context: .
       dockerfile: Dockerfile
     restart: "always"
-    container_name: xcbexporter
+    container_name: core-monitor
     network_mode: host
     environment:
       - NETWORK_ID=${NETWORK_ID}
