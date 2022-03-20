@@ -1,4 +1,4 @@
-module github.com/core-coin/xcbexporter
+module github.com/core-coin/core-monitor
 
 go 1.16
 
